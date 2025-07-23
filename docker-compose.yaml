@@ -1,0 +1,38 @@
+services:
+
+  postgres:
+    image: postgres:17.5
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${PGDBName:?error}
+      - POSTGRES_USER=${PGUser:?error}
+      - POSTGRES_PASSWORD=${PGPassword:?error}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${PGUser:?error} -d ${PGDBName:?error}" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+        - ./schema/migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://${PGUser:?error}:${PGPassword:?error}@${PGHost:?error}:${PGPort:?error}/${PGDBName:?error}?sslmode=${PGSSLMode:?error}", "up"]
+    links: 
+        - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: ./session-auth
+    ports:
+      - 8000:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
