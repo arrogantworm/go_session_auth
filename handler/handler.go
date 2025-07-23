@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Handler struct {
@@ -52,6 +53,10 @@ func (h *Handler) NewRouter() {
 		r.With(AuthMiddleware(h.service)).Post("/logout", h.LogOut)
 	})
 
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8000/swagger/doc.json"),
+	))
+
 	h.Router = r
 }
 
@@ -59,7 +64,7 @@ func (h *Handler) NewRouter() {
 
 func (h *Handler) sendSuccess(w http.ResponseWriter, message string, status int) error {
 
-	response := successRes{Message: message}
+	response := SuccessRes{Message: message}
 
 	resp, err := json.Marshal(response)
 	if err != nil {
@@ -79,7 +84,7 @@ func (h *Handler) sendSuccess(w http.ResponseWriter, message string, status int)
 
 func (h *Handler) sendError(w http.ResponseWriter, message string, status int) error {
 
-	response := errorRes{Message: message}
+	response := ErrorRes{Message: message}
 
 	resp, err := json.Marshal(response)
 	if err != nil {

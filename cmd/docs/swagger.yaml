@@ -1,0 +1,138 @@
+basePath: /
+definitions:
+  handler.ErrorRes:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.SuccessRes:
+    properties:
+      success:
+        type: string
+    type: object
+  models.Credentials:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: Session auth project
+  title: Session Auth
+  version: "1.0"
+paths:
+  /api/test:
+    get:
+      description: Secure endpoint
+      operationId: test-endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessRes'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorRes'
+      security:
+      - SessionAuth: []
+      summary: Test endpoint
+      tags:
+      - test
+  /auth/logout:
+    post:
+      description: Logout
+      operationId: auth-logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessRes'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorRes'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorRes'
+      security:
+      - SessionAuth: []
+      summary: LogOut
+      tags:
+      - auth
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      operationId: auth-signin
+      parameters:
+      - description: Credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorRes'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorRes'
+      summary: SignIn
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Registration
+      operationId: auth-signup
+      parameters:
+      - description: Credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Credentials'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.SuccessRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorRes'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorRes'
+      summary: SignUp
+      tags:
+      - auth
+securityDefinitions:
+  SessionAuth:
+    in: cookie
+    name: session_token
+    type: apiKey
+swagger: "2.0"

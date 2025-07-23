@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"session-auth/service"
 
@@ -17,10 +18,10 @@ func AuthMiddleware(s *service.Service) func(http.Handler) http.Handler {
 			if err != nil {
 				// log.Println(err)
 				if err == http.ErrNoCookie {
-					w.WriteHeader(http.StatusUnauthorized)
+					sendError(w, "user not authorized", http.StatusUnauthorized)
 					return
 				}
-				w.WriteHeader(http.StatusBadRequest)
+				sendError(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
@@ -30,14 +31,14 @@ func AuthMiddleware(s *service.Service) func(http.Handler) http.Handler {
 			sessionId, err := uuid.Parse(sessionToken)
 			if err != nil {
 				// log.Println(err)
-				w.WriteHeader(http.StatusBadRequest)
+				sendError(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 			// log.Println(sessionId)
 
 			session, err := s.ValidateSession(r.Context(), sessionId)
 			if err != nil {
-				w.WriteHeader(http.StatusUnauthorized)
+				sendError(w, err.Error(), http.StatusUnauthorized)
 				return
 			}
 			// log.Println(session)
@@ -46,4 +47,24 @@ func AuthMiddleware(s *service.Service) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func sendError(w http.ResponseWriter, message string, status int) error {
+
+	response := ErrorRes{Message: message}
+
+	resp, err := json.Marshal(response)
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(status)
+
+	_, err = w.Write(resp)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

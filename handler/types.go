@@ -3,13 +3,13 @@ package handler
 // Common structs
 
 type (
-	successRes struct {
+	SuccessRes struct {
 		Message string `json:"success"`
 	}
 )
 
 type (
-	errorRes struct {
+	ErrorRes struct {
 		Message string `json:"error"`
 	}
 )

@@ -10,9 +10,22 @@ import (
 	"session-auth/service"
 	"time"
 
+	_ "session-auth/cmd/docs"
+
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
+
+// @title Session Auth
+// @version 1.0
+// @description Session auth project
+
+// @host localhost:8000
+// @BasePath /
+
+// @securityDefinitions.apikey SessionAuth
+// @in cookie
+// @name session_token
 
 func main() {
 	if err := godotenv.Load(".env"); err != nil {

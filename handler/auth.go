@@ -8,17 +8,21 @@ import (
 	"session-auth/models"
 )
 
+// @Summary SignUp
+// @Tags auth
+// @Description Registration
+// @ID auth-signup
+// @Accept json
+// @Param input body models.Credentials true "Credentials"
+// @Produce json
+// @Success 201 {object} SuccessRes
+// @Failure 400,500 {object} ErrorRes
+// @Router /auth/signup [post]
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var credentials models.Credentials
 
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		var badRequestError *custom_errors.BadRequestError
-		if errors.As(err, &badRequestError) {
-			h.sendError(w, err.Error(), http.StatusBadRequest)
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-		}
-
+		h.sendError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -36,17 +40,21 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	h.sendSuccess(w, "user successfully registered", http.StatusCreated)
 }
 
+// @Summary SignIn
+// @Tags auth
+// @Description Login
+// @ID auth-signin
+// @Accept json
+// @Param input body models.Credentials true "Credentials"
+// @Produce json
+// @Success 200 {object} SuccessRes
+// @Failure 400,500 {object} ErrorRes
+// @Router /auth/signin [post]
 func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	var credentials models.Credentials
 
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		var badRequestError *custom_errors.BadRequestError
-		if errors.As(err, &badRequestError) {
-			h.sendError(w, err.Error(), http.StatusBadRequest)
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-		}
-
+		h.sendError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -75,6 +83,16 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 	h.sendSuccess(w, "user logged in", http.StatusOK)
 }
 
+// auth/logout
+// @Summary LogOut
+// @Tags auth
+// @Description Logout
+// @ID auth-logout
+// @Security SessionAuth
+// @Produce json
+// @Success 200 {object} SuccessRes
+// @Failure 401,500 {object} ErrorRes
+// @Router /auth/logout [post]
 func (h *Handler) LogOut(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*models.Session)
 	if session.Username == "" {
